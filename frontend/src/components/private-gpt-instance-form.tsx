@@ -2,11 +2,10 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 interface PrivateGPTInstanceFormProps {
-  namespace: string;
   apiUrl?: string;
 }
 
-export const PrivateGPTInstanceForm = ({ namespace, apiUrl }: PrivateGPTInstanceFormProps) => {
+export const PrivateGPTInstanceForm = ({ apiUrl }: PrivateGPTInstanceFormProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -32,7 +31,7 @@ export const PrivateGPTInstanceForm = ({ namespace, apiUrl }: PrivateGPTInstance
     setSuccess(false);
 
     try {
-      const url = apiUrl || `/api/namespaces/${namespace}/private-gpt-instances`;
+      const url = apiUrl || `/api/namespaces/private-gpt-instances`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
