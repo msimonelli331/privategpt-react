@@ -1,0 +1,22 @@
+{
+  "name": "privategpt-k8s-backend",
+  "version": "1.0.0",
+  "description": "Kubernetes namespace listing API for PrivateGPT",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "webpack": "webpack --config webpackdev.config.ts --watch",
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@kubernetes/client-node": "^0.18.0",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}

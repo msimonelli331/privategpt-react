@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "privategpt-react.fullname" . }}
+  labels:
+    {{- include "privategpt-react.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "privategpt-react.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "privategpt-react.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "privategpt-react.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if or (.Values.persistentVolume.enabled) (.Values.configMap.enabled) }}
+          volumeMounts:
+          {{- end }}
+          {{- if .Values.persistentVolume.enabled }}
+          - name: {{ .Values.persistentVolume.name }}
+            mountPath: {{ .Values.persistentVolume.mountPath }}
+          {{- end }}
+          {{- if .Values.configMap.enabled }}
+          - name: {{ .Values.configMap.name }}
+            mountPath: {{ .Values.configMap.mountPath }}
+            readOnly: true
+          {{- end }}
+      {{- if or (.Values.persistentVolume.enabled) (.Values.configMap.enabled) }}
+      volumes:
+      {{- end }}
+      {{- if .Values.persistentVolume.enabled }}
+      - name: {{ .Values.persistentVolume.name }}
+        persistentVolumeClaim:
+          claimName: {{ include "privategpt-react.fullname" . }}
+      {{- end }}
+      {{- if .Values.configMap.enabled }}
+      - name: {{ .Values.configMap.name }}
+        configMap:
+          name: {{ include "privategpt-react.fullname" . }}
+          items:
+          {{- range $path, $_ :=  .Files.Glob  "configs/*" }}
+            - key: {{ $path | replace "configs/" "" }}
+              path: {{ $path | replace "configs/" "" }}
+          {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
