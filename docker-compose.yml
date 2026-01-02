@@ -1,9 +1,8 @@
 services:
   react:
     image: ghcr.io/msimonelli331/privategpt-react:latest
-    #command: [""]
     ports:
-      - 5173:5173
+      - 3000:3000
     build:
       context: .
       dockerfile: Dockerfile

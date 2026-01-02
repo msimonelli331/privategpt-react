@@ -1,17 +1,14 @@
 # Multi-stage Dockerfile for PrivateGPT React app with backend
 FROM node:25-alpine AS builder
 
-# Set working directory
-WORKDIR /app
-
 # Build the frontend
-COPY frontend .
 WORKDIR /app/frontend
+COPY frontend .
 RUN npm install -g pnpm && pnpm install && pnpm build
 
 # Build the backend
-COPY backend .
 WORKDIR /app/backend
+COPY backend .
 RUN pnpm install
 
 FROM node:25-alpine
@@ -20,7 +17,8 @@ FROM node:25-alpine
 WORKDIR /app
 
 # Copy built frontend and backend
-COPY --from=builder /app/frontend/{dist,package.json} ./frontend/
+COPY --from=builder /app/frontend/dist ./frontend/dist
+COPY --from=builder /app/frontend/package.json ./frontend/
 COPY --from=builder /app/backend ./backend
 
 # Change ownership
@@ -35,4 +33,4 @@ ENV NODE_ENV=production
 EXPOSE 3000
 
 # Set entrypoint to run both frontend and backend
-ENTRYPOINT ["pnpm start"]
+ENTRYPOINT ["node", "backend/src/index.js"]
