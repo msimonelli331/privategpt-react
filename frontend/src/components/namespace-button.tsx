@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { PrivateGPTInstanceForm } from '@/components/private-gpt-instance-form';
 
 interface NamespaceButtonProps {
   apiUrl?: string;
@@ -9,6 +10,7 @@ export const NamespaceButton = ({ apiUrl }: NamespaceButtonProps) => {
   const [loading, setLoading] = useState(false);
   const [namespaces, setNamespaces] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   const fetchNamespaces = async () => {
     setLoading(true);
@@ -39,17 +41,35 @@ export const NamespaceButton = ({ apiUrl }: NamespaceButtonProps) => {
 
   return (
     <div className="space-y-4">
-      <Button
-        onClick={fetchNamespaces}
-        disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white"
-      >
-        {loading ? 'Loading...' : 'Fetch Namespaces'}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          onClick={fetchNamespaces}
+          disabled={loading}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {loading ? 'Loading...' : 'Fetch Namespaces'}
+        </Button>
+        
+        <Button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-green-600 hover:bg-green-700 text-white"
+        >
+          {showForm ? 'Hide Form' : 'Show Create Form'}
+        </Button>
+      </div>
 
       {error && (
         <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           Error: {error}
+        </div>
+      )}
+
+      {showForm && (
+        <div className="mt-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
+          <PrivateGPTInstanceForm 
+            namespace={namespaces.length > 0 ? namespaces[0].name : 'default'} 
+            apiUrl={apiUrl}
+          />
         </div>
       )}
 

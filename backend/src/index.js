@@ -1,6 +1,12 @@
 const express = require("express");
 const k8s = require("@kubernetes/client-node");
-const { getK8sApiClient, formatNamespace, formatPod } = require("./utils");
+const {
+  getK8sApiClient,
+  formatNamespace,
+  formatPod,
+  listPrivateGPTInstances,
+  createPrivateGPTInstance,
+} = require("./utils");
 const path = require("path");
 
 const PORT = process.env.PORT || 3000;
@@ -59,6 +65,90 @@ app.get("/api/namespaces/:namespace/pods", async (req, res) => {
     });
   }
 });
+
+// API endpoint to list PrivateGPTInstances in a specific namespace
+app.get(
+  "/api/namespaces/:namespace/private-gpt-instances",
+  async (req, res) => {
+    try {
+      const { namespace } = req.params;
+      const instances = await listPrivateGPTInstances(namespace);
+
+      res.json({
+        success: true,
+        count: instances.length,
+        namespace: namespace,
+        instances: instances,
+      });
+    } catch (err) {
+      console.error(
+        `Error listing PrivateGPTInstances in namespace ${namespace}:`,
+        err
+      );
+      res.status(500).json({
+        success: false,
+        error: `Failed to list PrivateGPTInstances in namespace ${namespace}`,
+        message: err.message,
+      });
+    }
+  }
+);
+
+// API endpoint to create a PrivateGPTInstance in a specific namespace
+app.post(
+  "/api/namespaces/:namespace/private-gpt-instances",
+  async (req, res) => {
+    try {
+      const { namespace } = req.params;
+      let instanceData = req.body;
+
+      // Validate required fields
+      if (!instanceData.name) {
+        return res.status(400).json({
+          success: false,
+          error: "Name is required for PrivateGPTInstance",
+        });
+      }
+
+      if (!instanceData.ollamaURL) {
+        // Use env var as the default
+        if (!process.env.OLLAMA_URL) {
+          return res.status(400).json({
+            success: false,
+            error: "ollamaURL is required for PrivateGPTInstance",
+          });
+        }
+        instanceData.ollamaURL = process.env.OLLAMA_URL;
+      }
+
+      if (!instanceData.image) {
+        instanceData.image = "ghcr.io/msimonelli331/privategpt:latest";
+      }
+
+      if (!instanceData.domain) {
+        instanceData.domain = "devops";
+      }
+
+      const instance = await createPrivateGPTInstance(namespace, instanceData);
+
+      res.json({
+        success: true,
+        message: "PrivateGPTInstance created successfully",
+        instance: instance,
+      });
+    } catch (err) {
+      console.error(
+        `Error creating PrivateGPTInstance in namespace ${namespace}:`,
+        err
+      );
+      res.status(500).json({
+        success: false,
+        error: "Failed to create PrivateGPTInstance",
+        message: err.message,
+      });
+    }
+  }
+);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

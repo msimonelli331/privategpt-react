@@ -30,6 +30,12 @@ const getK8sApiClient = (apiType) => {
     return kc.makeApiClient(apiType);
 };
 
+// Get custom resource API client for PrivateGPTInstance
+const getCustomResourceApiClient = () => {
+    const kc = createK8sClient();
+    return kc.makeApiClient(k8s.CustomObjectsApi);
+};
+
 // Format namespace data
 const formatNamespace = (namespace) => ({
     name: namespace.metadata.name,
@@ -56,9 +62,77 @@ const formatPod = (pod) => ({
     }))
 });
 
+// Format PrivateGPTInstance data
+const formatPrivateGPTInstance = (instance) => ({
+    name: instance.metadata.name,
+    namespace: instance.metadata.namespace,
+    uid: instance.metadata.uid,
+    creationTimestamp: instance.metadata.creationTimestamp,
+    labels: instance.metadata.labels || {},
+    annotations: instance.metadata.annotations || {},
+    spec: instance.spec || {},
+    status: instance.status || {}
+});
+
+// List NamespacedCustomObjects (PrivateGPTInstance)
+const listPrivateGPTInstances = async (namespace) => {
+    const customApi = getCustomResourceApiClient();
+    try {
+        const response = await customApi.listNamespacedCustomObject(
+            'privategpt.eirl', // group
+            'v1alpha1',         // version
+            namespace,          // namespace
+            'privategptinstances' // plural
+        );
+        return response.body.items.map(formatPrivateGPTInstance);
+    } catch (err) {
+        console.error(`Error listing PrivateGPTInstances in namespace ${namespace}:`, err);
+        throw err;
+    }
+};
+
+// Create NamespacedCustomObject (PrivateGPTInstance)
+const createPrivateGPTInstance = async (namespace, instanceData) => {
+    const customApi = getCustomResourceApiClient();
+    try {
+        const customObject = {
+            apiVersion: 'privategpt.eirl/v1alpha1',
+            kind: 'PrivateGPTInstance',
+            metadata: {
+                name: instanceData.name,
+                namespace: namespace,
+                labels: instanceData.labels || {},
+                annotations: instanceData.annotations || {}
+            },
+            spec: {
+                ollamaURL: instanceData.ollamaURL,
+                image: instanceData.image,
+                domain: instanceData.domain
+            }
+        };
+        
+        const response = await customApi.createNamespacedCustomObject(
+            'privategpt.eirl', // group
+            'v1alpha1',         // version
+            namespace,          // namespace
+            'privategptinstances', // plural
+            customObject
+        );
+        
+        return formatPrivateGPTInstance(response.body);
+    } catch (err) {
+        console.error(`Error creating PrivateGPTInstance in namespace ${namespace}:`, err);
+        throw err;
+    }
+};
+
 module.exports = {
     createK8sClient,
     getK8sApiClient,
+    getCustomResourceApiClient,
     formatNamespace,
-    formatPod
+    formatPod,
+    formatPrivateGPTInstance,
+    listPrivateGPTInstances,
+    createPrivateGPTInstance
 };
