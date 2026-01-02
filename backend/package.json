@@ -1,22 +1,19 @@
 {
-  "name": "privategpt-k8s-backend",
+  "name": "privategpt-react-backend",
   "version": "1.0.0",
-  "description": "Kubernetes namespace listing API for PrivateGPT",
+  "description": "This is a Node.js backend server that provides a REST API for interacting with Kubernetes clusters. It's designed to be used with the PrivateGPT React application to provide Kubernetes namespace and pod information.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
-    "webpack": "webpack --config webpackdev.config.ts --watch",
-    "build": "webpack",
+    "dev": "node src/index.js",
+    "start": "node src/index.js",
+    "build": "cd ../frontend && pnpm install && pnpm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@kubernetes/client-node": "^0.18.0",
-    "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT"
+    "@kubernetes/client-node": "^1.4.0",
+    "express": "^5.2.1"
+  }
 }

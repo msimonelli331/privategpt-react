@@ -13,16 +13,20 @@ export const NamespaceButton = ({ apiUrl }: NamespaceButtonProps) => {
   const fetchNamespaces = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Use the provided API URL or default to the backend
       const url = apiUrl || '/api/namespaces';
-      const response = await fetch(url);
-      
+      const response = await fetch(url, {
+        headers: {
+          "accepts": "application/json"
+        }
+      });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setNamespaces(data.namespaces || []);
     } catch (err) {
@@ -35,20 +39,20 @@ export const NamespaceButton = ({ apiUrl }: NamespaceButtonProps) => {
 
   return (
     <div className="space-y-4">
-      <Button 
-        onClick={fetchNamespaces} 
+      <Button
+        onClick={fetchNamespaces}
         disabled={loading}
         className="bg-blue-600 hover:bg-blue-700 text-white"
       >
         {loading ? 'Loading...' : 'Fetch Namespaces'}
       </Button>
-      
+
       {error && (
         <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           Error: {error}
         </div>
       )}
-      
+
       {namespaces.length > 0 && (
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2">Namespaces:</h3>

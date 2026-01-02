@@ -34,9 +34,11 @@ pnpm start
 ## API Endpoints
 
 ### GET /api/namespaces
+
 List all namespaces in the Kubernetes cluster
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -55,9 +57,11 @@ List all namespaces in the Kubernetes cluster
 ```
 
 ### GET /api/namespaces/:namespace/pods
+
 List all pods in a specific namespace
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -85,9 +89,11 @@ List all pods in a specific namespace
 ```
 
 ### GET /health
+
 Health check endpoint
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -118,3 +124,11 @@ The server will automatically try to load Kubernetes configuration in this order
 ## License
 
 MIT
+
+https://github.com/kubernetes-client/javascript/blob/master/examples/in-cluster.js
+https://leejjon.medium.com/create-a-react-app-served-by-express-js-node-js-and-add-typescript-33705be3ceda
+https://github.com/Leejjon/frontend-service
+https://stackoverflow.com/questions/68796298/how-do-i-deploy-a-react-app-that-has-a-node-js-server
+https://www.freecodecamp.org/news/how-to-create-a-react-app-with-a-node-backend-the-complete-guide/
+https://stackoverflow.com/questions/79553495/throw-new-typeerrormissing-parameter-name-at-i-debug-url
+https://expressjs.com/en/guide/migrating-5.html#path-syntax

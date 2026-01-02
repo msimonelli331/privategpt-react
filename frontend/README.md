@@ -31,3 +31,7 @@ To start developing, follow these steps:
 
 - https://pnpm.io/installation
 - https://nodejs.org/en/download
+- https://react.dev/learn/build-a-react-app-from-scratch
+- https://vite.dev/plugins/#vitejs-plugin-react
+- https://vite.dev/guide/backend-integration
+- https://vite.dev/config/server-options#server-proxy

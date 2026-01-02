@@ -29,3 +29,11 @@ npm -v
 install_pnpm
 install_helm
 install_cline
+
+pushd frontend
+pnpm install
+popd
+
+pushd backend
+pnpm install
+popd

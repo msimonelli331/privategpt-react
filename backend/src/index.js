@@ -1,19 +1,19 @@
 const express = require('express');
 const k8s = require('@kubernetes/client-node');
-const { createK8sClient, getK8sApiClient, formatNamespace, formatPod } = require('./utils');
+const { getK8sApiClient, formatNamespace, formatPod } = require('./utils');
 const path = require('path');
 
+const PORT = process.env.PORT || 3000;
+
 const app = express();
-const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
 
 // Serve static files from the frontend build directory
-app.use(express.static(path.join(__dirname, '../dist')));
+app.use(express.static(path.resolve(__dirname, '../frontend/dist')));
 
 // Create Kubernetes client
-const kc = createK8sClient();
 const k8sApi = getK8sApiClient(k8s.CoreV1Api);
 
 // API endpoint to list namespaces
@@ -70,12 +70,12 @@ app.get('/health', (req, res) => {
 });
 
 // Serve frontend files for all other routes (this enables client-side routing)
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
+app.get('/{*splat}', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../frontend/dist', 'index.html'));
 });
 
-app.listen(port, () => {
-    console.log(`Kubernetes API server listening at http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`Server listening on ${PORT}`);
 });
 
 module.exports = app;
