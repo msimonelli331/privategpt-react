@@ -3,6 +3,16 @@ entries:
   privategpt-react:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2026-01-03T19:32:19.168389071Z"
+    description: A Helm chart for the PrivateGPT React frontend with Kubernetes backend
+    digest: ad16ae3671b956142b04d99199a02ba80c4a57627a9358ed7d087163f43485e6
+    name: privategpt-react
+    type: application
+    urls:
+    - https://github.com/msimonelli331/privategpt-react/releases/download/privategpt-react-0.1.4/privategpt-react-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2026-01-03T19:30:20.654259813Z"
     description: A Helm chart for the PrivateGPT React frontend with Kubernetes backend
     digest: e11e5dc7134fada40d22bcdf2020c93926c02599021913d2c286cacf41c25f3c
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://github.com/msimonelli331/privategpt-react/releases/download/privategpt-react-0.1.2/privategpt-react-0.1.2.tgz
     version: 0.1.2
-generated: "2026-01-03T19:30:20.654268049Z"
+generated: "2026-01-03T19:32:19.168407809Z"
