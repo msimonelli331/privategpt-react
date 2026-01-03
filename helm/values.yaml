@@ -12,7 +12,7 @@ image:
 
 env:
   - name: PORT
-    value: 3000
+    value: "3000"
   - name: NODE_ENV
     value: production
   - name: NAMESPACE
