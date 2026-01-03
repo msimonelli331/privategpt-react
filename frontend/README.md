@@ -1,4 +1,4 @@
-# PrivateGPT SDK demo app
+# PrivateGPT React Frontend
 
 This demo app showcases the usage of the PrivateGPT SDK.
 

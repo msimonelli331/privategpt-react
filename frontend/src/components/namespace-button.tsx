@@ -49,7 +49,7 @@ export const NamespaceButton = ({ apiUrl }: NamespaceButtonProps) => {
         >
           {loading ? 'Loading...' : 'Fetch Namespaces'}
         </Button>
-        
+
         <Button
           onClick={() => setShowForm(!showForm)}
           className="bg-green-600 hover:bg-green-700 text-white"
@@ -66,8 +66,7 @@ export const NamespaceButton = ({ apiUrl }: NamespaceButtonProps) => {
 
       {showForm && (
         <div className="mt-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
-          <PrivateGPTInstanceForm 
-            namespace={namespaces.length > 0 ? namespaces[0].name : 'default'} 
+          <PrivateGPTInstanceForm
             apiUrl={apiUrl}
           />
         </div>
