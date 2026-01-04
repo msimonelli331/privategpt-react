@@ -2,14 +2,10 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { checkIsPgptHealthy } from '@/lib/pgpt';
 import { useEffect, useState } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
 
 export const RootPage = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [environment, setEnvironment, deleteEnvironment] = useLocalStorage<
-    string | undefined
-  >('pgpt-url', undefined);
   const [instances, setInstances] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,16 +14,10 @@ export const RootPage = () => {
     try {
       const isHealthy = await checkIsPgptHealthy(env);
       if (!isHealthy) {
-        alert('The Private GPT instance is not healthy');
-        return deleteEnvironment();
+        alert(`The Private GPT instance is ${env} not healthy`);
       }
-      // Remove auto-redirect to /chat
-      // if (pathname === '/') {
-      //   navigate('/chat');
-      // }
     } catch {
-      alert('The Private GPT instance is not healthy');
-      deleteEnvironment();
+      alert(`The Private GPT instance is ${env} not healthy`);
     }
   };
 
@@ -61,24 +51,12 @@ export const RootPage = () => {
     // Check if we have a hostname parameter in the URL
     const urlParams = new URLSearchParams(window.location.search);
     const hostname = urlParams.get('hostname');
-    
+
     if (hostname) {
       // Use the hostname from query parameter
-      setEnvironment(hostname);
       checkPrivateGptHealth(hostname);
-    } else if (!environment) {
-      // Fall back to localStorage or prompt
-      const url = prompt(
-        'Please enter the URL of your Private GPT instance',
-        'http://localhost:8001',
-      );
-      if (!url) return;
-      setEnvironment(url);
-      checkPrivateGptHealth(url);
-    } else {
-      checkPrivateGptHealth(environment);
     }
-  }, [environment]);
+  }, [pathname]);
 
   // Fetch private gpt instances when navigating to root path
   useEffect(() => {

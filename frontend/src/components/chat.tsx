@@ -56,7 +56,6 @@ export function Chat() {
   // Extract hostname from query parameter before using it
   const urlParams = new URLSearchParams(window.location.search);
   const hostname = urlParams.get('hostname') || '';
-  const [environment, setEnvironment] = useState<string>(hostname);
   const [input, setInput] = useState('');
   const [systemPrompt, setSystemPrompt] = useLocalStorage<string>(
     'system-prompt',
@@ -75,12 +74,12 @@ export function Chat() {
   );
   const { addFile, files, deleteFile, isUploadingFile, isFetchingFiles } =
     useFiles({
-      client: PrivategptClient.getInstance(environment),
+      client: PrivategptClient.getInstance(hostname),
       fetchFiles: true,
     });
 
   const { completion, isLoading, stop } = useChat({
-    client: PrivategptClient.getInstance(environment),
+    client: PrivategptClient.getInstance(hostname),
     messages: messages.map(({ sources: _, ...rest }) => rest),
     onFinish: ({ completion: c, sources: s }) => {
       addMessage({ role: 'assistant', content: c, sources: s });
@@ -129,7 +128,7 @@ export function Chat() {
 
   const searchDocs = async (input: string) => {
     const chunks = await PrivategptClient.getInstance(
-      environment,
+      hostname,
     ).contextChunks.chunksRetrieval({ text: input });
     const content = chunks.data.reduce((acc, chunk, index) => {
       return `${acc}**${index + 1}.${chunk.document.docMetadata?.file_name}${chunk.document.docMetadata?.page_label
@@ -150,7 +149,7 @@ export function Chat() {
         <header className="sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background px-4">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-semibold">Playground</h1>
-            <Link to={`/prompt?hostname=${environment}`}>Go to prompt</Link>
+            <Link to={`/prompt?hostname=${hostname}`}>Go to prompt</Link>
           </div>
           <Button variant="ghost" onClick={clearChat}>
             Clear

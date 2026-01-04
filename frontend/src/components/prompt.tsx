@@ -59,7 +59,6 @@ export function Prompt() {
   // Extract hostname from query parameter
   const urlParams = new URLSearchParams(window.location.search);
   const hostname = urlParams.get('hostname') || '';
-  const [environment, setEnvironment] = useState<string>(hostname);
   const [input, setInput] = useState('');
   const [prompt, setPrompt] = useState<string>('');
   const [systemPrompt, setSystemPrompt] = useLocalStorage<string>(
@@ -72,12 +71,12 @@ export function Prompt() {
   );
   const { addFile, files, deleteFile, isUploadingFile, isFetchingFiles } =
     useFiles({
-      client: PrivategptClient.getInstance(environment),
+      client: PrivategptClient.getInstance(hostname),
       fetchFiles: true,
     });
 
   const { completion, isLoading, stop, setCompletion } = usePrompt({
-    client: PrivategptClient.getInstance(environment),
+    client: PrivategptClient.getInstance(hostname),
     prompt,
     useContext: mode === 'query',
     enabled: prompt.length > 0 && ['query', 'prompt'].includes(mode),
@@ -92,15 +91,15 @@ export function Prompt() {
     contextFilter: {
       docsIds: ['query', 'search'].includes(mode)
         ? selectedFiles.reduce((acc, fileName) => {
-            const groupedDocs = files?.filter((f) => f.fileName === fileName);
-            if (!groupedDocs) return acc;
-            const docIds = [] as string[];
-            groupedDocs.forEach((d) => {
-              docIds.push(...d.docs.map((d) => d.docId));
-            });
-            acc.push(...docIds);
-            return acc;
-          }, [] as string[])
+          const groupedDocs = files?.filter((f) => f.fileName === fileName);
+          if (!groupedDocs) return acc;
+          const docIds = [] as string[];
+          groupedDocs.forEach((d) => {
+            docIds.push(...d.docs.map((d) => d.docId));
+          });
+          acc.push(...docIds);
+          return acc;
+        }, [] as string[])
         : [],
     },
   });
@@ -122,14 +121,12 @@ export function Prompt() {
 
   const searchDocs = async (input: string) => {
     const chunks = await PrivategptClient.getInstance(
-      environment,
+      hostname,
     ).contextChunks.chunksRetrieval({ text: input });
     const content = chunks.data.reduce((acc, chunk, index) => {
-      return `${acc}**${index + 1}.${
-        chunk.document.docMetadata?.file_name
-      } (page ${chunk.document.docMetadata?.page_label})** \n\n ${
-        chunk.document.docMetadata?.original_text
-      } \n\n`;
+      return `${acc}**${index + 1}.${chunk.document.docMetadata?.file_name
+        } (page ${chunk.document.docMetadata?.page_label})** \n\n ${chunk.document.docMetadata?.original_text
+        } \n\n`;
     }, '');
     setCompletion(content);
   };
@@ -271,8 +268,8 @@ export function Prompt() {
                                     setSelectedFiles(
                                       isSelected
                                         ? selectedFiles.filter(
-                                            (f) => f !== file.fileName,
-                                          )
+                                          (f) => f !== file.fileName,
+                                        )
                                         : [...selectedFiles, file.fileName],
                                     );
                                   }}
