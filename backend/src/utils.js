@@ -92,6 +92,7 @@ const listPrivateGPTInstances = async (namespace) => {
       namespace: namespace,
       plural: "privategptinstances",
     });
+    console.log(response);
     console.log(
       `Successfully retrieved ${response.body.items.length} instances`
     );
