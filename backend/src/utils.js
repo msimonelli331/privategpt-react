@@ -93,10 +93,8 @@ const listPrivateGPTInstances = async (namespace) => {
       plural: "privategptinstances",
     });
     console.log(response);
-    console.log(
-      `Successfully retrieved ${response.body.items.length} instances`
-    );
-    return response.body.items.map(formatPrivateGPTInstance);
+    console.log(`Successfully retrieved ${response.items.length} instances`);
+    return response.items.map(formatPrivateGPTInstance);
   } catch (err) {
     console.error(
       `Error listing PrivateGPTInstances in namespace ${namespace}:`,
@@ -150,8 +148,9 @@ const createPrivateGPTInstance = async (namespace, instanceData) => {
       body: customObject,
     });
 
+    console.log(response);
     console.log("Successfully created instance");
-    return formatPrivateGPTInstance(response.body);
+    return formatPrivateGPTInstance(response);
   } catch (err) {
     console.error(
       `Error creating PrivateGPTInstance in namespace ${namespace}:`,
