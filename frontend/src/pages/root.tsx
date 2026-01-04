@@ -110,21 +110,21 @@ export const RootPage = () => {
               <p className="text-gray-600">Click to create a new PrivateGPT instance</p>
             </div>
           </div>
-          
+
           {instances.length > 0 ? (
-            instances.map((instance, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => navigate(`/chat?namespace=${instance.metadata?.name}`)}
-              >
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Instance: {instance.metadata?.name}</h2>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>Domain: {instance.spec?.domain || 'N/A'}</span>
-                  <span>Created: {instance.metadata?.creationTimestamp ? new Date(instance.metadata.creationTimestamp).toLocaleDateString() : 'N/A'}</span>
+            instances.map((instance, index) => {
+              const domain: string = instance.spec?.domain || 'devops';
+              const hostname = instance.name + ".pgpt." + domain;
+              return (
+                <div
+                  key={index}
+                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/chat?hostname=${hostname}`)}
+                >
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">Instance: {instance.name}</h2>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="col-span-full text-center py-12">
               <p className="text-gray-500">No private gpt instances found</p>
@@ -134,6 +134,6 @@ export const RootPage = () => {
         </div>
       </div>
       <Outlet />
-    </div>
+    </div >
   );
 };
