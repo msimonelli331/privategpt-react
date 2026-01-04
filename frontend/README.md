@@ -29,6 +29,11 @@ To start developing, follow these steps:
 
 ## Resources
 
+- https://docs.privategpt.dev/manual/user-interface/alternatives
+- https://docs.privategpt.dev/installation/getting-started/installation
+- https://github.com/zylon-ai/private-gpt/issues/2163
+- https://github.com/zylon-ai/private-gpt/issues/1302
+- https://docs.privategpt.dev/api-reference/api-reference/contextual-completions/chat-completion
 - https://pnpm.io/installation
 - https://nodejs.org/en/download
 - https://react.dev/learn/build-a-react-app-from-scratch

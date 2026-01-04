@@ -7,6 +7,7 @@ import {
 import { ChatPage } from './pages/chat';
 import { PromptPage } from './pages/prompt';
 import { RootPage } from './pages/root';
+import { CreatePage } from './pages/create';
 
 const routes: RouteObject[] = [
   {
@@ -20,6 +21,10 @@ const routes: RouteObject[] = [
       {
         path: 'prompt',
         element: <PromptPage />,
+      },
+      {
+        path: 'create',
+        element: <CreatePage />,
       },
     ],
   },
