@@ -86,12 +86,12 @@ const listPrivateGPTInstances = async (namespace) => {
     );
     console.log(`Group parameter should be: 'privategpt.eirl'`);
 
-    const response = await customApi.listNamespacedCustomObject(
-      "privategpt.eirl", // group
-      "v1alpha1", // version
-      namespace, // namespace
-      "privategptinstances" // plural
-    );
+    const response = await customApi.listNamespacedCustomObject({
+      group: "privategpt.eirl",
+      version: "v1alpha1",
+      namespace: namespace,
+      plural: "privategptinstances",
+    });
     console.log(
       `Successfully retrieved ${response.body.items.length} instances`
     );
@@ -141,13 +141,13 @@ const createPrivateGPTInstance = async (namespace, instanceData) => {
       JSON.stringify(customObject, null, 2)
     );
 
-    const response = await customApi.createNamespacedCustomObject(
-      "privategpt.eirl", // group
-      "v1alpha1", // version
-      namespace, // namespace
-      "privategptinstances", // plural
-      customObject
-    );
+    const response = await customApi.createNamespacedCustomObject({
+      group: "privategpt.eirl",
+      version: "v1alpha1",
+      namespace: namespace,
+      plural: "privategptinstances",
+      body: customObject,
+    });
 
     console.log("Successfully created instance");
     return formatPrivateGPTInstance(response.body);
