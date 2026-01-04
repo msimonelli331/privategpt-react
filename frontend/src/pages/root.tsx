@@ -58,7 +58,16 @@ export const RootPage = () => {
   };
 
   useEffect(() => {
-    if (!environment) {
+    // Check if we have a hostname parameter in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const hostname = urlParams.get('hostname');
+    
+    if (hostname) {
+      // Use the hostname from query parameter
+      setEnvironment(hostname);
+      checkPrivateGptHealth(hostname);
+    } else if (!environment) {
+      // Fall back to localStorage or prompt
       const url = prompt(
         'Please enter the URL of your Private GPT instance',
         'http://localhost:8001',

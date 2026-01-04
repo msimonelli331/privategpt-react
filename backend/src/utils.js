@@ -81,18 +81,12 @@ const formatPrivateGPTInstance = (instance) => ({
 const listPrivateGPTInstances = async (namespace) => {
   const customApi = getCustomResourceApiClient();
   try {
-    console.log(
-      `Attempting to list PrivateGPTInstances in namespace: ${namespace}`
-    );
-    console.log(`Group parameter should be: 'privategpt.eirl'`);
-
     const response = await customApi.listNamespacedCustomObject({
       group: "privategpt.eirl",
       version: "v1alpha1",
       namespace: namespace,
       plural: "privategptinstances",
     });
-    console.log(response);
     console.log(`Successfully retrieved ${response.items.length} instances`);
     return response.items.map(formatPrivateGPTInstance);
   } catch (err) {
@@ -100,13 +94,6 @@ const listPrivateGPTInstances = async (namespace) => {
       `Error listing PrivateGPTInstances in namespace ${namespace}:`,
       err
     );
-    console.error("Error details:", {
-      message: err.message,
-      stack: err.stack,
-      api: err.api,
-      method: err.method,
-      field: err.field,
-    });
     throw err;
   }
 };
@@ -115,10 +102,6 @@ const listPrivateGPTInstances = async (namespace) => {
 const createPrivateGPTInstance = async (namespace, instanceData) => {
   const customApi = getCustomResourceApiClient();
   try {
-    console.log(
-      `Attempting to create PrivateGPTInstance in namespace: ${namespace}`
-    );
-
     const customObject = {
       apiVersion: "privategpt.eirl/v1alpha1",
       kind: "PrivateGPTInstance",
@@ -148,7 +131,6 @@ const createPrivateGPTInstance = async (namespace, instanceData) => {
       body: customObject,
     });
 
-    console.log(response);
     console.log("Successfully created instance");
     return formatPrivateGPTInstance(response);
   } catch (err) {
@@ -156,13 +138,6 @@ const createPrivateGPTInstance = async (namespace, instanceData) => {
       `Error creating PrivateGPTInstance in namespace ${namespace}:`,
       err
     );
-    console.error("Error details:", {
-      message: err.message,
-      stack: err.stack,
-      api: err.api,
-      method: err.method,
-      field: err.field,
-    });
     throw err;
   }
 };

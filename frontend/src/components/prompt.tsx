@@ -56,7 +56,10 @@ export function Prompt() {
     'pgpt-sources',
     [] as PrivategptApi.Chunk[],
   );
-  const [environment] = useLocalStorage('pgpt-url', '');
+  // Extract hostname from query parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const hostname = urlParams.get('hostname') || '';
+  const [environment, setEnvironment] = useState<string>(hostname);
   const [input, setInput] = useState('');
   const [prompt, setPrompt] = useState<string>('');
   const [systemPrompt, setSystemPrompt] = useLocalStorage<string>(

@@ -15,7 +15,7 @@ export class PrivategptClient {
       }
       this.instance = new PrivategptApiClient({ environment: url });
     }
-    if (url) {
+    if (url && url !== this.instance.configuration.environment) {
       this.instance = new PrivategptApiClient({ environment: url });
     }
     return this.instance;

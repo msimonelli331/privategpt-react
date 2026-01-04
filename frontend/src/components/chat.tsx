@@ -53,7 +53,10 @@ export function Chat() {
     'pgpt-chat-mode',
     'chat',
   );
-  const [environment] = useLocalStorage('pgpt-url', '');
+  // Extract hostname from query parameter before using it
+  const urlParams = new URLSearchParams(window.location.search);
+  const hostname = urlParams.get('hostname') || '';
+  const [environment, setEnvironment] = useState<string>(hostname);
   const [input, setInput] = useState('');
   const [systemPrompt, setSystemPrompt] = useLocalStorage<string>(
     'system-prompt',
@@ -92,15 +95,15 @@ export function Chat() {
     contextFilter: {
       docsIds: ['query', 'search'].includes(mode)
         ? selectedFiles.reduce((acc, fileName) => {
-            const groupedDocs = files?.filter((f) => f.fileName === fileName);
-            if (!groupedDocs) return acc;
-            const docIds = [] as string[];
-            groupedDocs.forEach((d) => {
-              docIds.push(...d.docs.map((d) => d.docId));
-            });
-            acc.push(...docIds);
-            return acc;
-          }, [] as string[])
+          const groupedDocs = files?.filter((f) => f.fileName === fileName);
+          if (!groupedDocs) return acc;
+          const docIds = [] as string[];
+          groupedDocs.forEach((d) => {
+            docIds.push(...d.docs.map((d) => d.docId));
+          });
+          acc.push(...docIds);
+          return acc;
+        }, [] as string[])
         : [],
     },
   });
@@ -129,11 +132,10 @@ export function Chat() {
       environment,
     ).contextChunks.chunksRetrieval({ text: input });
     const content = chunks.data.reduce((acc, chunk, index) => {
-      return `${acc}**${index + 1}.${chunk.document.docMetadata?.file_name}${
-        chunk.document.docMetadata?.page_label
-          ? ` (page ${chunk.document.docMetadata?.page_label})** `
-          : '**'
-      }\n\n ${chunk.document.docMetadata?.original_text} \n\n  `;
+      return `${acc}**${index + 1}.${chunk.document.docMetadata?.file_name}${chunk.document.docMetadata?.page_label
+        ? ` (page ${chunk.document.docMetadata?.page_label})** `
+        : '**'
+        }\n\n ${chunk.document.docMetadata?.original_text} \n\n  `;
     }, '');
     addMessage({ role: 'assistant', content });
   };
@@ -148,7 +150,7 @@ export function Chat() {
         <header className="sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background px-4">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-semibold">Playground</h1>
-            <Link to="/prompt">Go to prompt</Link>
+            <Link to={`/prompt?hostname=${environment}`}>Go to prompt</Link>
           </div>
           <Button variant="ghost" onClick={clearChat}>
             Clear
@@ -266,8 +268,8 @@ export function Chat() {
                                     setSelectedFiles(
                                       isSelected
                                         ? selectedFiles.filter(
-                                            (f) => f !== file.fileName,
-                                          )
+                                          (f) => f !== file.fileName,
+                                        )
                                         : [...selectedFiles, file.fileName],
                                     );
                                   }}
