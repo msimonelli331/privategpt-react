@@ -72,6 +72,13 @@ export function Prompt() {
     'selected-files',
     [],
   );
+  const [messages, setMessages, clearChat] = useLocalStorage<
+    Array<
+      PrivategptApi.OpenAiMessage & {
+        sources?: PrivategptApi.Chunk[];
+      }
+    >
+  >('messages', []);
   const { addFile, files } =
     useFiles({
       client: PrivategptClient.getInstance(getFullBaseUrl(hostname)),
@@ -107,20 +114,61 @@ export function Prompt() {
     },
   });
 
+  // const { chatCompletion, chatIsLoading, stopChat } = useChat({
+  //   client: PrivategptClient.getInstance(getFullBaseUrl(hostname)),
+  //   messages: messages.map(({ sources: _, ...rest }) => rest),
+  //   onFinish: ({ completion: c, sources: s }) => {
+  //     addMessage({ role: 'assistant', content: c, sources: s });
+  //     setTimeout(() => {
+  //       messageRef.current?.focus();
+  //     }, 100);
+  //   },
+  //   useContext: mode === 'query',
+  //   enabled: ['query', 'chat'].includes(mode),
+  //   includeSources: mode === 'query',
+  //   systemPrompt,
+  //   contextFilter: {
+  //     docsIds: ['query', 'search'].includes(mode)
+  //       ? selectedFiles.reduce((acc, fileName) => {
+  //         const groupedDocs = files?.filter((f) => f.fileName === fileName);
+  //         if (!groupedDocs) return acc;
+  //         const docIds = [] as string[];
+  //         groupedDocs.forEach((d) => {
+  //           docIds.push(...d.docs.map((d) => d.docId));
+  //         });
+  //         acc.push(...docIds);
+  //         return acc;
+  //       }, [] as string[])
+  //       : [],
+  //   },
+  // });
+
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!input) return;
     const content = input.trim();
-    addPrompt(content);
-    if (mode === 'search') {
+    if (mode === 'prompt') {
+      addPrompt(content);
+    } else if (mode === 'chat') {
+      addMessage({ role: 'user', content });
+    } else if (mode === 'search') {
       searchDocs(content);
     }
   };
 
   const addPrompt = (message: string) => {
     setPrompt(message);
+    setInput('');
+  };
+
+  const addMessage = (
+    message: PrivategptApi.OpenAiMessage & {
+      sources?: PrivategptApi.Chunk[];
+    },
+  ) => {
+    setMessages((prev) => [...prev, message]);
     setInput('');
   };
 
@@ -135,6 +183,19 @@ export function Prompt() {
     }, '');
     setCompletion(content);
   };
+
+  // const searchDocsChat = async (input: string) => {
+  //   const chunks = await PrivategptClient.getInstance(
+  //     getFullBaseUrl(hostname),
+  //   ).contextChunks.chunksRetrieval({ text: input });
+  //   const content = chunks.data.reduce((acc, chunk, index) => {
+  //     return `${acc}**${index + 1}.${chunk.document.docMetadata?.file_name}${chunk.document.docMetadata?.page_label
+  //       ? ` (page ${chunk.document.docMetadata?.page_label})** `
+  //       : '**'
+  //       }\n\n ${chunk.document.docMetadata?.original_text} \n\n  `;
+  //   }, '');
+  //   addMessage({ role: 'assistant', content });
+  // };
 
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
@@ -166,6 +227,7 @@ export function Prompt() {
                     setPrompt('');
                     setCompletion('');
                     setShowDropdown(false);
+                    clearChat()
                   }}
                 >
                   Clear Chat
@@ -230,7 +292,7 @@ export function Prompt() {
             </Badge>
             <div className="flex-1">
               <div className="flex flex-col space-y-4">
-                {prompt && (
+                {mode === "prompt" && prompt && (
                   <div
                     className={cn(
                       'h-fit p-3 grid gap-2 shadow-lg rounded-xl w-fit self-start',
@@ -247,6 +309,43 @@ export function Prompt() {
                     />
                   </div>
                 )}
+                {mode === "chat" &&
+                  messages.map((message, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        'h-fit p-3 grid gap-2 shadow-lg rounded-xl w-fit',
+                        {
+                          'self-start': message.role === 'user',
+                          'self-end bg-violet-200 w-full':
+                            message.role === 'assistant',
+                        },
+                      )}
+                    >
+                      <Badge variant="outline" className="w-fit bg-muted/100">
+                        {message.role}
+                      </Badge>
+                      <div
+                        className="text-sm prose text-black marker:text-black"
+                        dangerouslySetInnerHTML={{
+                          __html: marked.parse(message.content || ''),
+                        }}
+                      />
+                      {message.sources && message.sources?.length > 0 && (
+                        <div>
+                          <p className="font-bold">Sources:</p>
+                          {message.sources.map((source) => (
+                            <p key={source.document.docId}>
+                              <strong>
+                                {source.document.docMetadata?.file_name as string}
+                              </strong>
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                }
                 {completion && (
                   <div className="h-fit p-3 grid gap-2 shadow-lg rounded-xl w-full self-end bg-violet-200">
                     <Badge variant="outline" className="w-fit bg-muted/100">

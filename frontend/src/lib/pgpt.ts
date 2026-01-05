@@ -14,11 +14,13 @@ export class PrivategptClient {
       if (!url) {
         throw new Error('PrivategptClient instance not initialized with a url');
       }
+      console.log(`New instance: ${url}`)
       this.instance = new PrivategptApiClient({ environment: url });
     }
     if (url) {
       // Use dynamic protocol detection for the URL
       const dynamicUrl = getFullBaseUrl(url);
+      console.log(`Update instance: ${dynamicUrl}`)
       this.instance = new PrivategptApiClient({ environment: dynamicUrl });
     }
     return this.instance;
