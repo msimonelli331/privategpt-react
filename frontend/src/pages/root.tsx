@@ -86,18 +86,6 @@ export const RootPage = () => {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Create Instance Box */}
-          <div
-            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border-2 border-dashed border-blue-300 flex items-center justify-center"
-            onClick={() => navigate('/create')}
-          >
-            <div className="text-center">
-              <div className="text-4xl mb-2">+</div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Create New Instance</h2>
-              <p className="text-gray-600">Click to create a new PrivateGPT instance</p>
-            </div>
-          </div>
-
           {instances.length > 0 ? (
             instances.map((instance, index) => {
               const domain: string = instance.spec?.domain || 'devops';
@@ -106,7 +94,7 @@ export const RootPage = () => {
                 <div
                   key={index}
                   className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/chat?hostname=${hostname}`)}
+                  onClick={() => navigate(`/prompt?hostname=${hostname}`)}
                 >
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">Instance: {instance.name}</h2>
                 </div>
@@ -118,9 +106,19 @@ export const RootPage = () => {
               <p className="text-gray-400 text-sm mt-2">Click "Refresh Instances" to load data</p>
             </div>
           )}
+          <br></br>
+          {/* Create Instance Box */}
+          <div
+            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border-2 border-dashed border-blue-300 flex items-center justify-center"
+            onClick={() => navigate('/create')}
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-2">+</div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Create New Instance</h2>
+            </div>
+          </div>
         </div>
       </div>
-      <Outlet />
     </div >
   );
 };

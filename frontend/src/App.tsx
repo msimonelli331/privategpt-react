@@ -13,20 +13,18 @@ const routes: RouteObject[] = [
   {
     path: '/',
     element: <RootPage />,
-    children: [
-      {
-        path: 'chat',
-        element: <ChatPage />,
-      },
-      {
-        path: 'prompt',
-        element: <PromptPage />,
-      },
-      {
-        path: 'create',
-        element: <CreatePage />,
-      },
-    ],
+  },
+  {
+    path: '/create',
+    element: <CreatePage />,
+  },
+  {
+    path: '/chat',
+    element: <ChatPage />,
+  },
+  {
+    path: '/prompt',
+    element: <PromptPage />,
   },
 ];
 

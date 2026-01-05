@@ -1,4 +1,4 @@
-import { CornerDownLeft, Paperclip, StopCircle } from 'lucide-react';
+import { CornerDownLeft, Paperclip, StopCircle, Menu } from 'lucide-react';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import {
   Select,
@@ -22,10 +22,12 @@ import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
 import { PrivategptApi } from 'privategpt-sdk-web';
 import { PrivategptClient } from '@/lib/pgpt';
+import { getFullBaseUrl } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { marked } from 'marked';
 import { useLocalStorage } from 'usehooks-ts';
+import { useNavigate } from 'react-router-dom';
 
 const MODES = [
   {
@@ -42,11 +44,17 @@ const MODES = [
   {
     value: 'prompt',
     title: 'Prompt',
-    description: 'No context from files',
+    description: 'Prompt the model to perform a task. No context from files',
+  },
+  {
+    value: 'chat',
+    title: 'LLM Chat',
+    description: 'Freeform char with the model. No context from files',
   },
 ] as const;
 
 export function Prompt() {
+  const navigate = useNavigate();
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const [mode, setMode] = useLocalStorage<(typeof MODES)[number]['value']>(
     'pgpt-prompt-mode',
@@ -71,21 +79,21 @@ export function Prompt() {
   );
   const { addFile, files, deleteFile, isUploadingFile, isFetchingFiles } =
     useFiles({
-      client: PrivategptClient.getInstance(hostname),
+      client: PrivategptClient.getInstance(getFullBaseUrl(hostname)),
       fetchFiles: true,
     });
 
   const { completion, isLoading, stop, setCompletion } = usePrompt({
-    client: PrivategptClient.getInstance(hostname),
+    client: PrivategptClient.getInstance(getFullBaseUrl(hostname)),
     prompt,
-    useContext: mode === 'query',
-    enabled: prompt.length > 0 && ['query', 'prompt'].includes(mode),
     onFinish: ({ sources }) => {
       setSources(sources);
       setTimeout(() => {
         messageRef.current?.focus();
       }, 100);
     },
+    useContext: mode === 'query',
+    enabled: prompt.length > 0 && ['query', 'prompt'].includes(mode),
     includeSources: mode === 'query',
     systemPrompt,
     contextFilter: {
@@ -104,6 +112,8 @@ export function Prompt() {
     },
   });
 
+  const [showModal, setShowModal] = useState(false);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!input) return;
@@ -121,7 +131,7 @@ export function Prompt() {
 
   const searchDocs = async (input: string) => {
     const chunks = await PrivategptClient.getInstance(
-      hostname,
+      getFullBaseUrl(hostname),
     ).contextChunks.chunksRetrieval({ text: input });
     const content = chunks.data.reduce((acc, chunk, index) => {
       return `${acc}**${index + 1}.${chunk.document.docMetadata?.file_name
@@ -143,160 +153,51 @@ export function Prompt() {
     <div className="grid h-screen w-full">
       <div className="flex flex-col">
         <header className="sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background px-4">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-semibold">Playground</h1>
-            <Link to="/chat">Go to chat</Link>
-          </div>
           <Button
             variant="ghost"
-            onClick={() => {
-              setPrompt('');
-              setCompletion('');
-            }}
+            onClick={() => setShowModal(true)}
+            className="p-2"
           >
-            Clear
+            <Menu className="size-4" />
+          </Button>
+          <div className="flex-1 flex justify-center">
+            <Select value={mode} onValueChange={setMode as any}>
+              <SelectTrigger
+                id="mode"
+                className="items-start [&_[data-description]]:hidden w-fit"
+              >
+                <SelectValue placeholder="Select a mode" />
+              </SelectTrigger>
+              <SelectContent>
+                {MODES.map((mode) => (
+                  <SelectItem key={mode.value} value={mode.value}>
+                    <div className="flex items-start gap-3 text-muted-foreground">
+                      <div className="grid gap-0.5">
+                        <p>{mode.title}</p>
+                        <p className="text-xs" data-description>
+                          {mode.description}
+                        </p>
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            onClick={() => navigate('/')}
+            className="bg-gray-600 hover:bg-gray-700 text-white"
+          >
+            Back to Dashboard
           </Button>
         </header>
-        <main className="grid flex-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
+        <main className="grid flex-1 gap-4 p-4 md:grid-cols-1 lg:grid-cols-2">
           <div
             className="hidden flex-col items-start gap-8 md:flex"
             x-chunk="dashboard-03-chunk-0"
           >
-            <form className="grid w-full items-start gap-6 sticky top-20">
-              <fieldset className="grid gap-6 rounded-lg border p-4">
-                <legend className="-ml-1 px-1 text-sm font-medium">Mode</legend>
-                <div className="grid gap-3">
-                  <Select value={mode} onValueChange={setMode as any}>
-                    <SelectTrigger
-                      id="mode"
-                      className="items-start [&_[data-description]]:hidden"
-                    >
-                      <SelectValue placeholder="Select a mode" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {MODES.map((mode) => (
-                        <SelectItem key={mode.value} value={mode.value}>
-                          <div className="flex items-start gap-3 text-muted-foreground">
-                            <div className="grid gap-0.5">
-                              <p>{mode.title}</p>
-                              <p className="text-xs" data-description>
-                                {mode.description}
-                              </p>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </fieldset>
-              {['query', 'search'].includes(mode) && (
-                <>
-                  <fieldset
-                    className={cn('grid gap-6 rounded-lg border p-4', {
-                      'bg-muted/50': isUploadingFile || isFetchingFiles,
-                    })}
-                  >
-                    <legend className="-ml-1 px-1 text-sm font-medium">
-                      Files
-                    </legend>
-                    {isFetchingFiles ? (
-                      <p>Fetching files...</p>
-                    ) : (
-                      <div className="grid gap-3">
-                        {files && files.length > 0 ? (
-                          files.map((file, index) => (
-                            <div
-                              key={index}
-                              className="flex justify-between items-center"
-                            >
-                              <p>{file.fileName}</p>
-                              <Button
-                                variant="destructive"
-                                size="icon"
-                                className="size-6"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  deleteFile(file.fileName);
-                                  setSelectedFiles(
-                                    selectedFiles.filter(
-                                      (f) => f !== file.fileName,
-                                    ),
-                                  );
-                                }}
-                              >
-                                x
-                              </Button>
-                            </div>
-                          ))
-                        ) : (
-                          <p>No files ingested</p>
-                        )}
-                        {isUploadingFile && <p>Uploading file...</p>}
-                      </div>
-                    )}
-                  </fieldset>
-                  {mode === 'query' && (
-                    <fieldset
-                      className={cn('grid gap-6 rounded-lg border p-4', {
-                        'bg-muted/50': isUploadingFile || isFetchingFiles,
-                      })}
-                    >
-                      <legend className="-ml-1 px-1 text-sm font-medium">
-                        Ask to your docs (if none is selected, it will ask to
-                        all of them)
-                      </legend>
-                      {isFetchingFiles ? (
-                        <p>Fetching files...</p>
-                      ) : (
-                        <div className="grid gap-3">
-                          {files && files.length > 0 ? (
-                            files.map((file, index) => (
-                              <div
-                                key={index}
-                                className="flex justify-between items-center"
-                              >
-                                <p>{file.fileName}</p>
-                                <Checkbox
-                                  checked={selectedFiles.includes(
-                                    file.fileName,
-                                  )}
-                                  onCheckedChange={() => {
-                                    const isSelected = selectedFiles.includes(
-                                      file.fileName,
-                                    );
-                                    setSelectedFiles(
-                                      isSelected
-                                        ? selectedFiles.filter(
-                                          (f) => f !== file.fileName,
-                                        )
-                                        : [...selectedFiles, file.fileName],
-                                    );
-                                  }}
-                                />
-                              </div>
-                            ))
-                          ) : (
-                            <p>No files ingested</p>
-                          )}
-                          {isUploadingFile && <p>Uploading file...</p>}
-                        </div>
-                      )}
-                    </fieldset>
-                  )}
-                </>
-              )}
-              <div className="grid gap-3">
-                <Label htmlFor="content">System prompt</Label>
-                <Textarea
-                  id="content"
-                  value={systemPrompt}
-                  onChange={(e) => setSystemPrompt(e.target.value)}
-                  placeholder="You are a..."
-                  className="min-h-[9.5rem]"
-                />
-              </div>
-            </form>
+            {/* Removed the form element that contained mode dropdown and file selection */}
+            {/* File selection is now handled in the sidebar or through the modal */}
           </div>
           <div className="relative flex-col flex h-full space-y-4 flex- rounded-xl bg-muted/50 p-4 lg:col-span-2">
             <Badge
@@ -360,9 +261,9 @@ export function Prompt() {
                 Message
               </Label>
               <Textarea
-                id="message"
                 ref={messageRef}
                 disabled={isLoading}
+                id="message"
                 placeholder="Type your message here..."
                 className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
                 value={input}
@@ -428,6 +329,47 @@ export function Prompt() {
             </form>
           </div>
         </main>
+
+        {/* Modal Component */}
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-background rounded-lg p-6 w-80 max-w-sm">
+              <h3 className="text-lg font-semibold mb-4">Options</h3>
+              <div className="space-y-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setPrompt('');
+                    setCompletion('');
+                    setShowModal(false);
+                  }}
+                >
+                  Clear Chat
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    // Navigate to edit instance page
+                    navigate('/edit-instance');
+                    setShowModal(false);
+                  }}
+                >
+                  Edit Instance
+                </Button>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowModal(false)}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

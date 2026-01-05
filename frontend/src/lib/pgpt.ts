@@ -1,4 +1,5 @@
 import { PrivategptApiClient } from 'privategpt-sdk-web';
+import { getFullBaseUrl } from '@/lib/utils';
 
 export const checkIsPgptHealthy = async (url: string) => {
   const isHealthy = await PrivategptClient.getInstance(url).health.health();
@@ -16,7 +17,9 @@ export class PrivategptClient {
       this.instance = new PrivategptApiClient({ environment: url });
     }
     if (url) {
-      this.instance = new PrivategptApiClient({ environment: url });
+      // Use dynamic protocol detection for the URL
+      const dynamicUrl = getFullBaseUrl(url);
+      this.instance = new PrivategptApiClient({ environment: dynamicUrl });
     }
     return this.instance;
   }

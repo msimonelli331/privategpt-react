@@ -22,11 +22,12 @@ import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
 import { PrivategptApi } from 'privategpt-sdk-web';
 import { PrivategptClient } from '@/lib/pgpt';
+import { getFullBaseUrl } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { marked } from 'marked';
 import { useLocalStorage } from 'usehooks-ts';
-import { NamespaceButton } from '@/components/namespace-button';
+import { useNavigate } from 'react-router-dom';
 
 const MODES = [
   {
@@ -43,17 +44,18 @@ const MODES = [
   {
     value: 'chat',
     title: 'LLM Chat',
-    description: 'No context from files',
+    description: 'Freeform char with the model. No context from files',
   },
 ] as const;
 
 export function Chat() {
+  const navigate = useNavigate();
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const [mode, setMode] = useLocalStorage<(typeof MODES)[number]['value']>(
     'pgpt-chat-mode',
     'chat',
   );
-  // Extract hostname from query parameter before using it
+  // Extract hostname from query parameter
   const urlParams = new URLSearchParams(window.location.search);
   const hostname = urlParams.get('hostname') || '';
   const [input, setInput] = useState('');
@@ -74,12 +76,12 @@ export function Chat() {
   );
   const { addFile, files, deleteFile, isUploadingFile, isFetchingFiles } =
     useFiles({
-      client: PrivategptClient.getInstance(hostname),
+      client: PrivategptClient.getInstance(getFullBaseUrl(hostname)),
       fetchFiles: true,
     });
 
   const { completion, isLoading, stop } = useChat({
-    client: PrivategptClient.getInstance(hostname),
+    client: PrivategptClient.getInstance(getFullBaseUrl(hostname)),
     messages: messages.map(({ sources: _, ...rest }) => rest),
     onFinish: ({ completion: c, sources: s }) => {
       addMessage({ role: 'assistant', content: c, sources: s });
@@ -128,7 +130,7 @@ export function Chat() {
 
   const searchDocs = async (input: string) => {
     const chunks = await PrivategptClient.getInstance(
-      hostname,
+      getFullBaseUrl(hostname),
     ).contextChunks.chunksRetrieval({ text: input });
     const content = chunks.data.reduce((acc, chunk, index) => {
       return `${acc}**${index + 1}.${chunk.document.docMetadata?.file_name}${chunk.document.docMetadata?.page_label
@@ -148,13 +150,17 @@ export function Chat() {
       <div className="flex flex-col">
         <header className="sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background px-4">
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-semibold">Playground</h1>
             <Link to={`/prompt?hostname=${hostname}`}>Go to prompt</Link>
           </div>
           <Button variant="ghost" onClick={clearChat}>
             Clear
           </Button>
-          <NamespaceButton />
+          <Button
+            onClick={() => navigate('/')}
+            className="bg-gray-600 hover:bg-gray-700 text-white"
+          >
+            Back to Dashboard
+          </Button>
         </header>
         <main className="grid flex-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
           <div
