@@ -235,12 +235,12 @@ export function Prompt() {
               </div>
             )}
           </div>
-          <div className="flex-1 flex justify-center">
-            <Label htmlFor="mode" className="space-x4">Current Mode</Label>
+          <div className="flex-1 flex justify-center items-center gap-2">
+            <Label htmlFor="mode" className="text-sm">Current Mode</Label>
             <Select value={mode} onValueChange={setMode as any}>
               <SelectTrigger
                 id="mode"
-                className="items-start [&_[data-description]]:hidden w-fit"
+                className="items-center [&_[data-description]]:hidden w-fit"
               >
                 <SelectValue placeholder="Select a mode" />
               </SelectTrigger>
