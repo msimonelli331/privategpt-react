@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { checkIsPgptHealthy } from '@/lib/pgpt';
 import { useEffect, useState } from 'react';
