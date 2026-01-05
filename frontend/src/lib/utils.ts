@@ -13,8 +13,9 @@ export const getCurrentProtocol = (): string => {
 // Utility function to construct the base URL with dynamic protocol
 export const getBaseUrl = (hostname: string): string => {
   if (!hostname) return "";
-  console.log(`getBaseUrl: ${getCurrentProtocol()}://${hostname}`)
-  return `${getCurrentProtocol()}://${hostname}`;
+  const protocol = getCurrentProtocol();
+  console.log(`getBaseUrl: ${protocol}//${hostname}`);
+  return `${protocol}//${hostname}`;
 };
 
 // Utility function to get the current hostname
@@ -33,6 +34,6 @@ export const getFullBaseUrl = (hostname: string): string => {
   if (!hostname) return "";
   const protocol = getCurrentProtocol();
   const port = getCurrentPort();
-  console.log(`getFullBaseUrl: ${protocol}://${hostname}${port}`)
-  return `${protocol}://${hostname}${port}`;
+  console.log(`getFullBaseUrl: ${protocol}//${hostname}${port}`);
+  return `${protocol}//${hostname}${port}`;
 };

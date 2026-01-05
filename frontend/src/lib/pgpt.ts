@@ -1,9 +1,8 @@
-import { PrivategptApiClient } from 'privategpt-sdk-web';
-import { getFullBaseUrl } from '@/lib/utils';
+import { PrivategptApiClient } from "privategpt-sdk-web";
 
 export const checkIsPgptHealthy = async (url: string) => {
   const isHealthy = await PrivategptClient.getInstance(url).health.health();
-  return isHealthy.status === 'ok';
+  return isHealthy.status === "ok";
 };
 
 export class PrivategptClient {
@@ -12,16 +11,14 @@ export class PrivategptClient {
   static getInstance(url?: string) {
     if (!this.instance) {
       if (!url) {
-        throw new Error('PrivategptClient instance not initialized with a url');
+        throw new Error("PrivategptClient instance not initialized with a url");
       }
-      console.log(`New instance: ${url}`)
+      console.log(`New instance: ${url}`);
       this.instance = new PrivategptApiClient({ environment: url });
     }
     if (url) {
-      // Use dynamic protocol detection for the URL
-      const dynamicUrl = getFullBaseUrl(url);
-      console.log(`Update instance: ${dynamicUrl}`)
-      this.instance = new PrivategptApiClient({ environment: dynamicUrl });
+      console.log(`Update instance: ${url}`);
+      this.instance = new PrivategptApiClient({ environment: url });
     }
     return this.instance;
   }
