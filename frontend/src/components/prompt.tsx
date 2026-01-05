@@ -17,9 +17,7 @@ import { useFiles, usePrompt } from 'privategpt-sdk-web/react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Link } from 'react-router-dom';
 import { PrivategptApi } from 'privategpt-sdk-web';
 import { PrivategptClient } from '@/lib/pgpt';
 import { getFullBaseUrl } from '@/lib/utils';
@@ -69,15 +67,12 @@ export function Prompt() {
   const hostname = urlParams.get('hostname') || '';
   const [input, setInput] = useState('');
   const [prompt, setPrompt] = useState<string>('');
-  const [systemPrompt, setSystemPrompt] = useLocalStorage<string>(
-    'system-prompt',
-    '',
-  );
-  const [selectedFiles, setSelectedFiles] = useLocalStorage<string[]>(
+  const systemPrompt: string = localStorage.getItem(`${hostname}-system-prompt`) || "";
+  const [selectedFiles, _] = useLocalStorage<string[]>(
     'selected-files',
     [],
   );
-  const { addFile, files, deleteFile, isUploadingFile, isFetchingFiles } =
+  const { addFile, files } =
     useFiles({
       client: PrivategptClient.getInstance(getFullBaseUrl(hostname)),
       fetchFiles: true,
@@ -112,7 +107,7 @@ export function Prompt() {
     },
   });
 
-  const [showModal, setShowModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -153,13 +148,42 @@ export function Prompt() {
     <div className="grid h-screen w-full">
       <div className="flex flex-col">
         <header className="sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background px-4">
-          <Button
-            variant="ghost"
-            onClick={() => setShowModal(true)}
-            className="p-2"
-          >
-            <Menu className="size-4" />
-          </Button>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="p-2"
+            >
+              <Menu className="size-4" />
+            </Button>
+            {/* Dropdown Menu */}
+            {showDropdown && (
+              <div className="absolute top-10 left-0 w-48 bg-background border rounded-md shadow-lg z-20">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setPrompt('');
+                    setCompletion('');
+                    setShowDropdown(false);
+                  }}
+                >
+                  Clear Chat
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    // Navigate to edit instance page
+                    navigate('/edit?hostname=' + hostname);
+                    setShowDropdown(false);
+                  }}
+                >
+                  Edit Instance
+                </Button>
+              </div>
+            )}
+          </div>
           <div className="flex-1 flex justify-center">
             <Select value={mode} onValueChange={setMode as any}>
               <SelectTrigger
@@ -191,15 +215,13 @@ export function Prompt() {
             Back to Dashboard
           </Button>
         </header>
-        <main className="grid flex-1 gap-4 p-4 md:grid-cols-1 lg:grid-cols-2">
+        <main className="grid flex-1 gap-4 p-4 md:grid-cols-1">
           <div
             className="hidden flex-col items-start gap-8 md:flex"
             x-chunk="dashboard-03-chunk-0"
           >
-            {/* Removed the form element that contained mode dropdown and file selection */}
-            {/* File selection is now handled in the sidebar or through the modal */}
           </div>
-          <div className="relative flex-col flex h-full space-y-4 flex- rounded-xl bg-muted/50 p-4 lg:col-span-2">
+          <div className="relative flex-col flex h-full space-y-4 flex- rounded-xl bg-muted/50 p-4">
             <Badge
               variant="outline"
               className="absolute right-3 top-3 bg-muted/100"
@@ -329,47 +351,6 @@ export function Prompt() {
             </form>
           </div>
         </main>
-
-        {/* Modal Component */}
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-background rounded-lg p-6 w-80 max-w-sm">
-              <h3 className="text-lg font-semibold mb-4">Options</h3>
-              <div className="space-y-2">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setPrompt('');
-                    setCompletion('');
-                    setShowModal(false);
-                  }}
-                >
-                  Clear Chat
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    // Navigate to edit instance page
-                    navigate('/edit-instance');
-                    setShowModal(false);
-                  }}
-                >
-                  Edit Instance
-                </Button>
-              </div>
-              <div className="mt-6 flex justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowModal(false)}
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

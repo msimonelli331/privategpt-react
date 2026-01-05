@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { Label } from '@radix-ui/react-label';
+import { Label } from '@/components/ui/label';
 
 export function Edit() {
   const navigate = useNavigate();
@@ -18,7 +18,6 @@ export function Edit() {
     `${hostname}-system-prompt`,
     '',
   );
-  //const systemPrompt: string = localStorage.getItem(`${hostname}-system-prompt`) || "";
   const [selectedFiles, setSelectedFiles] = useLocalStorage<string[]>(
     'selected-files',
     [],
@@ -40,7 +39,7 @@ export function Edit() {
             Done Editting
           </Button>
         </header>
-        <main className="grid flex-1 gap-4 p-4 md:grid-cols-1 lg:grid-cols-2">
+        <main className="grid flex-1 gap-4 p-4 md:grid-cols-1">
           <div
             className="hidden flex-col items-start gap-8 md:flex"
             x-chunk="dashboard-03-chunk-0"
