@@ -55,7 +55,7 @@ export function Prompt() {
   const navigate = useNavigate();
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const [mode, setMode] = useLocalStorage<(typeof MODES)[number]['value']>(
-    'pgpt-prompt-mode',
+    'pgpt-mode',
     'prompt',
   );
   const [sources, setSources] = useLocalStorage(
@@ -114,7 +114,7 @@ export function Prompt() {
     },
   });
 
-  const { chatCompletion, chatIsLoading, stopChat } = useChat({
+  const { completion: chatCompletion, isLoading: chatIsLoading, stop: stopChat } = useChat({
     client: PrivategptClient.getInstance(getFullBaseUrl(hostname)),
     messages: messages.map(({ sources: _, ...rest }) => rest),
     onFinish: ({ completion: c, sources: s }) => {
@@ -177,23 +177,12 @@ export function Prompt() {
       getFullBaseUrl(hostname),
     ).contextChunks.chunksRetrieval({ text: input });
     const content = chunks.data.reduce((acc, chunk, index) => {
-      return `${acc}**${index + 1}.${chunk.document.docMetadata?.file_name
-        } (page ${chunk.document.docMetadata?.page_label})** \n\n ${chunk.document.docMetadata?.original_text
-        } \n\n`;
-    }, '');
-    setCompletion(content);
-  };
-
-  const searchDocsChat = async (input: string) => {
-    const chunks = await PrivategptClient.getInstance(
-      getFullBaseUrl(hostname),
-    ).contextChunks.chunksRetrieval({ text: input });
-    const content = chunks.data.reduce((acc, chunk, index) => {
       return `${acc}**${index + 1}.${chunk.document.docMetadata?.file_name}${chunk.document.docMetadata?.page_label
         ? ` (page ${chunk.document.docMetadata?.page_label})** `
         : '**'
         }\n\n ${chunk.document.docMetadata?.original_text} \n\n  `;
     }, '');
+    setCompletion(content);
     addMessage({ role: 'assistant', content });
   };
 
@@ -227,7 +216,7 @@ export function Prompt() {
                     setPrompt('');
                     setCompletion('');
                     setShowDropdown(false);
-                    clearChat()
+                    clearChat();
                   }}
                 >
                   Clear Chat
@@ -247,6 +236,7 @@ export function Prompt() {
             )}
           </div>
           <div className="flex-1 flex justify-center">
+            <Label htmlFor="mode" className="space-x4">Current Mode</Label>
             <Select value={mode} onValueChange={setMode as any}>
               <SelectTrigger
                 id="mode"

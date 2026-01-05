@@ -4,7 +4,6 @@ import {
   createBrowserRouter,
 } from 'react-router-dom';
 
-import { ChatPage } from './pages/chat';
 import { PromptPage } from './pages/prompt';
 import { RootPage } from './pages/root';
 import { CreatePage } from './pages/create';
@@ -18,10 +17,6 @@ const routes: RouteObject[] = [
   {
     path: '/create',
     element: <CreatePage />,
-  },
-  {
-    path: '/chat',
-    element: <ChatPage />,
   },
   {
     path: '/prompt',
