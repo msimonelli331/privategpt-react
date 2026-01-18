@@ -45,6 +45,7 @@ export const RootPage = () => {
     } finally {
       setLoading(false);
     }
+    //setInstances([{ "name": "default" }]);
   };
 
   useEffect(() => {

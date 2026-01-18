@@ -1,4 +1,4 @@
-import { CornerDownLeft, Paperclip, StopCircle, Menu } from 'lucide-react';
+import { CornerDownLeft, Paperclip, StopCircle, Menu, X, Home } from 'lucide-react';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import {
   Select,
@@ -46,8 +46,8 @@ const MODES = [
   },
   {
     value: 'chat',
-    title: 'LLM Chat',
-    description: 'Freeform char with the model. No context from files',
+    title: 'Chat',
+    description: 'Freeform chat with the model. No context from files',
   },
 ] as const;
 
@@ -143,7 +143,42 @@ export function Prompt() {
     },
   });
 
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  //const [sidebarClass, setSidebarClass] = useState("hidden");
+  const [sidebarClass, setSidebarClass] = useState("hidden");
+  const [promptContentClass, setPromptContentClass] = useState("col-span-8");
+  const [promptContentHeaderClass, setPromptContentHeaderClass] = useState("sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background p-4");
+  const [promptContentMainClass, setPromptContentMainClass] = useState("grid flex-1 gap-4 p-4 md:grid-cols-1");
+
+  // Close sidebar when clicking outside
+  useEffect(() => {
+    if (sidebarOpen) {
+      setSidebarClass("col-span-7 inset-y-0 left-0 z-20 bg-background border-r shadow-lg transform transition-transform duration-300 ease-in-out");
+      setPromptContentClass("col-span-1");
+      setPromptContentHeaderClass("sticky top-0 z-10 justify-between flex h-[57px] items-center gap-2 border-b bg-background p-2");
+      setPromptContentMainClass("grid flex-1 gap-4 p-2 md:grid-cols-1");
+    } else {
+      setSidebarClass("hidden");
+      setPromptContentClass("col-span-8");
+      setPromptContentHeaderClass("sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background p-4");
+      setPromptContentMainClass("grid flex-1 gap-4 p-4 md:grid-cols-1");
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebar = document.getElementById('sidebar');
+      const menuButton = document.getElementById('menu-button');
+
+      if (sidebarOpen && sidebar && !sidebar.contains(event.target as Node) &&
+        menuButton && !menuButton.contains(event.target as Node)) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [sidebarOpen]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -195,47 +230,47 @@ export function Prompt() {
   }, [prompt]);
 
   return (
-    <div className="grid h-screen w-full">
-      <div className="flex flex-col">
-        <header className="sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background px-4">
+    <div className="grid grid-cols-8 h-screen w-full">
+      <div id="sidebar" className={sidebarClass}>
+        <div className="p-4">
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => {
+              setPrompt('');
+              setCompletion('');
+              setSidebarOpen(false);
+              clearChat();
+            }}
+          >
+            Clear Chat
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => {
+              // Navigate to edit instance page
+              navigate('/edit?hostname=' + hostname);
+              setSidebarOpen(false);
+            }}
+          >
+            Edit Instance
+          </Button>
+        </div>
+      </div>
+      <div className={promptContentClass}>
+        <header className={promptContentHeaderClass}>
           <div className="relative">
             <Button
+              id="menu-button"
               variant="ghost"
-              onClick={() => setShowDropdown(!showDropdown)}
+              onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2"
             >
-              <Menu className="size-4" />
+              {sidebarOpen ? <X className="size-4" /> : <Menu className="size-4" />}
             </Button>
-            {/* Dropdown Menu */}
-            {showDropdown && (
-              <div className="absolute top-10 left-0 w-48 bg-background border rounded-md shadow-lg z-20">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setPrompt('');
-                    setCompletion('');
-                    setShowDropdown(false);
-                    clearChat();
-                  }}
-                >
-                  Clear Chat
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    // Navigate to edit instance page
-                    navigate('/edit?hostname=' + hostname);
-                    setShowDropdown(false);
-                  }}
-                >
-                  Edit Instance
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="flex-1 flex justify-center items-center gap-2">
+          </div >
+          < div className="flex-1 flex justify-center items-center gap-2">
             <Label htmlFor="mode" className="text-sm">Current Mode</Label>
             <Select value={mode} onValueChange={setMode as any}>
               <SelectTrigger
@@ -260,14 +295,12 @@ export function Prompt() {
               </SelectContent>
             </Select>
           </div>
-          <Button
+          <Home
             onClick={() => navigate('/')}
-            className="bg-gray-600 hover:bg-gray-700 text-white"
-          >
-            Back to Dashboard
-          </Button>
-        </header>
-        <main className="grid flex-1 gap-4 p-4 md:grid-cols-1">
+            className="size-4"
+          />
+        </header >
+        <main className={promptContentMainClass}>
           <div
             className="hidden flex-col items-start gap-8 md:flex"
             x-chunk="dashboard-03-chunk-0"
