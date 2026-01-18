@@ -7,6 +7,7 @@ import { useLocalStorage } from 'usehooks-ts';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Label } from '@/components/ui/label';
+import { ArrowLeft } from 'lucide-react';
 
 export function Edit() {
   const navigate = useNavigate();
@@ -32,12 +33,8 @@ export function Edit() {
     <div className="grid h-screen w-full">
       <div className="flex flex-col">
         <header className="sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background px-4">
-          <Button
-            onClick={() => navigate(`/prompt?hostname=${hostname}`)}
-            className="bg-gray-600 hover:bg-gray-700 text-white"
-          >
-            Done Editting
-          </Button>
+          <p className="text-xl font-semibold text-gray-900">Edit Instance</p>
+          <ArrowLeft onClick={() => navigate(-1)} />
         </header>
         <main className="grid flex-1 gap-4 p-4 md:grid-cols-1">
           <div
@@ -147,6 +144,15 @@ export function Edit() {
                   placeholder="You are a..."
                   className="min-h-[9.5rem]"
                 />
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-x-6">
+                <Button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white "
+                >
+                  Edit PrivateGPTInstance
+                </Button>
               </div>
             </form>
           </div>

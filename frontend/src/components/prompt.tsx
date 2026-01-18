@@ -243,7 +243,7 @@ export function Prompt() {
               clearChat();
             }}
           >
-            Clear Chat
+            <p className="text-xl font-semibold text-gray-900">Clear Chat</p>
           </Button>
           <Button
             variant="ghost"
@@ -254,7 +254,7 @@ export function Prompt() {
               setSidebarOpen(false);
             }}
           >
-            Edit Instance
+            <p className="text-xl font-semibold text-gray-900">Edit Instance</p>
           </Button>
         </div>
       </div>
@@ -267,11 +267,11 @@ export function Prompt() {
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2"
             >
-              {sidebarOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+              {sidebarOpen ? <X /> : <Menu />}
             </Button>
           </div >
           < div className="flex-1 flex justify-center items-center gap-2">
-            <Label htmlFor="mode" className="text-sm">Current Mode</Label>
+            <Label htmlFor="mode" className="text-xl font-semibold text-gray-900">Current Mode</Label>
             <Select value={mode} onValueChange={setMode as any}>
               <SelectTrigger
                 id="mode"
@@ -284,7 +284,7 @@ export function Prompt() {
                   <SelectItem key={mode.value} value={mode.value}>
                     <div className="flex items-start gap-3 text-muted-foreground">
                       <div className="grid gap-0.5">
-                        <p>{mode.title}</p>
+                        <p className="font-semibold text-gray-900">{mode.title}</p>
                         <p className="text-xs" data-description>
                           {mode.description}
                         </p>
@@ -295,10 +295,7 @@ export function Prompt() {
               </SelectContent>
             </Select>
           </div>
-          <Home
-            onClick={() => navigate('/')}
-            className="size-4"
-          />
+          <Home onClick={() => navigate('/')} />
         </header >
         <main className={promptContentMainClass}>
           <div

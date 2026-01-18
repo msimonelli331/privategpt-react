@@ -2,6 +2,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { checkIsPgptHealthy } from '@/lib/pgpt';
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { RefreshCcw } from 'lucide-react';
 
 export const RootPage = () => {
   const navigate = useNavigate();
@@ -22,30 +24,37 @@ export const RootPage = () => {
   };
 
   const fetchPrivateGptInstances = async () => {
-
     setLoading(true);
     setError(null);
 
+    // Check if we're in development mode (Vite dev server)
+    const isDevMode = import.meta.env.MODE === 'development' || import.meta.env.DEV;
+
     try {
-      const response = await fetch("/api/namespaces/private-gpt-instances", {
-        headers: {
-          "accepts": "application/json"
+      if (isDevMode) {
+        // In development mode, use hardcoded default instance
+        setInstances([{ "name": "development" }]);
+      } else {
+        // In production mode, fetch from API
+        const response = await fetch("/api/namespaces/private-gpt-instances", {
+          headers: {
+            "accepts": "application/json"
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setInstances(data.instances || []);
       }
-
-      const data = await response.json();
-      setInstances(data.instances || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       console.error('Error fetching private gpt instances:', err);
     } finally {
       setLoading(false);
     }
-    //setInstances([{ "name": "default" }]);
   };
 
   useEffect(() => {
@@ -67,58 +76,52 @@ export const RootPage = () => {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">PrivateGPT Dashboard</h1>
-          <button
-            onClick={fetchPrivateGptInstances}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? 'Loading...' : 'Refresh Instances'}
-          </button>
-        </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            Error: {error}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {instances.length > 0 ? (
-            instances.map((instance, index) => {
-              const domain: string = instance.spec?.domain || 'devops';
-              const hostname = instance.name + ".pgpt." + domain;
-              return (
-                <div
-                  key={index}
-                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/prompt?hostname=${hostname}`)}
-                >
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2">Instance: {instance.name}</h2>
-                </div>
-              );
-            })
-          ) : (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500">No private gpt instances found</p>
-              <p className="text-gray-400 text-sm mt-2">Click "Refresh Instances" to load data</p>
+    <div className="grid h-screen w-full">
+      <div className="flex flex-col">
+        <header className="sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background px-4">
+          <p className="text-xl font-semibold text-gray-900">PrivateGPT Dashboard</p>
+          <RefreshCcw onClick={fetchPrivateGptInstances} />
+        </header>
+        <main className="flex-1 gap-4 p-4">
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              Error: {error}
             </div>
           )}
-          <br></br>
-          {/* Create Instance Box */}
-          <div
-            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border-2 border-dashed border-blue-300 flex items-center justify-center"
-            onClick={() => navigate('/create')}
-          >
-            <div className="text-center">
-              <div className="text-4xl mb-2">+</div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Create New Instance</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {instances.length > 0 ? (
+              instances.map((instance, index) => {
+                const domain: string = instance.spec?.domain || 'devops';
+                const hostname = instance.name + ".pgpt." + domain;
+                return (
+                  <div
+                    key={index}
+                    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => navigate(`/prompt?hostname=${hostname}`)}
+                  >
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Instance: {instance.name}</h2>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500">No private gpt instances found</p>
+                <p className="text-gray-400 text-sm mt-2">Click "Refresh Instances" to load data</p>
+              </div>
+            )}
+            {/* Create Instance Box */}
+            <div
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border-2 border-dashed border-blue-300 flex items-center justify-center"
+              onClick={() => navigate('/create')}
+            >
+              <div className="text-center">
+                <div className="text-4xl mb-2">+</div>
+                <p className="text-xl font-semibold text-gray-900 mb-2">Create New Instance</p>
+              </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div >
   );

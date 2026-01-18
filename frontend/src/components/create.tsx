@@ -4,6 +4,7 @@ import { useLocalStorage } from 'usehooks-ts';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { useNavigate } from 'react-router-dom';
+import { Home } from 'lucide-react';
 
 interface PrivateGPTInstanceFormProps {
   apiUrl?: string;
@@ -79,13 +80,8 @@ export function Create({ apiUrl }: PrivateGPTInstanceFormProps) {
     <div className="grid h-screen w-full">
       <div className="flex flex-col">
         <header className="sticky top-0 z-10 justify-between flex h-[57px] items-center gap-1 border-b bg-background px-4">
-          <h1 className="text-3xl font-bold text-gray-900">Create PrivateGPT Instance</h1>
-          <Button
-            onClick={() => navigate('/')}
-            className="bg-gray-600 hover:bg-gray-700 text-white"
-          >
-            Back to Dashboard
-          </Button>
+          <p className="text-xl font-semibold text-gray-900">New Instance</p>
+          <Home onClick={() => navigate('/')} />
         </header>
         <main className="flex-1 gap-4 p-4">
           <div className="space-y-4">
