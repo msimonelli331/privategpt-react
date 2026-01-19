@@ -2,14 +2,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { checkIsPgptHealthy } from '@/lib/pgpt';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { RefreshCcw } from 'lucide-react';
 
 export const RootPage = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [instances, setInstances] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [_, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const checkPrivateGptHealth = async (env: string) => {
